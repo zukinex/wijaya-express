@@ -9,8 +9,8 @@ import {
 } from "../routing";
 import { haversineKm, type LatLng } from "../geo";
 
-const ALUN_ALUN: LatLng = { lat: -7.6298, lng: 111.5235 };
-const STASIUN: LatLng = { lat: -7.6219, lng: 111.5153 };
+const ALUN_ALUN: LatLng = { lat: -7.6024, lng: 111.901 };
+const STASIUN: LatLng = { lat: -7.592, lng: 112.101 };
 
 function jsonResponse(body: unknown, ok = true): Response {
   return {
@@ -30,8 +30,8 @@ describe("getRoute", () => {
               distance: 2500,
               geometry: {
                 coordinates: [
-                  [111.5235, -7.6298],
-                  [111.5153, -7.6219],
+                  [111.901, -7.6024],
+                  [112.101, -7.592],
                 ],
               },
             },
@@ -45,12 +45,12 @@ describe("getRoute", () => {
     expect(result.isEstimate).toBe(false);
     expect(result.source).toBe("osrm");
     expect(result.geometry).toEqual([
-      [111.5235, -7.6298],
-      [111.5153, -7.6219],
+      [111.901, -7.6024],
+      [112.101, -7.592],
     ]);
     const calledUrl = (fetchFn as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
     expect(calledUrl).toContain("router.project-osrm.org");
-    expect(calledUrl).toContain("111.5235,-7.6298;111.5153,-7.6219");
+    expect(calledUrl).toContain("111.901,-7.6024;112.101,-7.592");
   });
 
   it("falls back to Haversine × 1.3 when OSRM returns no route", async () => {
@@ -106,29 +106,29 @@ describe("geocodeAddress", () => {
       Promise.resolve(
         jsonResponse([
           {
-            display_name: "Alun-Alun Madiun, Kota Madiun",
-            lat: "-7.6298",
-            lon: "111.5235",
+            display_name: "Alun-Alun Nganjuk, Nganjuk",
+            lat: "-7.6024",
+            lon: "111.901",
           },
           {
-            display_name: "Stasiun Madiun, Kota Madiun",
-            lat: "-7.6219",
-            lon: "111.5153",
+            display_name: "Stasiun Kertosono, Nganjuk",
+            lat: "-7.592",
+            lon: "112.101",
           },
         ]),
       ),
     );
-    const results = await geocodeAddress("Alun-Alun Madiun", fetchFn);
+    const results = await geocodeAddress("Alun-Alun Nganjuk", fetchFn);
     expect(results).toEqual([
       {
-        displayName: "Alun-Alun Madiun, Kota Madiun",
-        lat: -7.6298,
-        lng: 111.5235,
+        displayName: "Alun-Alun Nganjuk, Nganjuk",
+        lat: -7.6024,
+        lng: 111.901,
       },
       {
-        displayName: "Stasiun Madiun, Kota Madiun",
-        lat: -7.6219,
-        lng: 111.5153,
+        displayName: "Stasiun Kertosono, Nganjuk",
+        lat: -7.592,
+        lng: 112.101,
       },
     ]);
     const calledUrl = (fetchFn as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
@@ -154,7 +154,7 @@ describe("geocodeAddress", () => {
     const fetchFn: FetchFn = vi.fn(() =>
       Promise.resolve(jsonResponse({ error: "x" }, false)),
     );
-    await expect(geocodeAddress("Madiun", fetchFn)).rejects.toThrow(
+    await expect(geocodeAddress("Nganjuk", fetchFn)).rejects.toThrow(
       "Pencarian alamat gagal",
     );
   });
@@ -169,7 +169,7 @@ describe("geocodeAddress", () => {
         ]),
       ),
     );
-    const results = await geocodeAddress("Madiun", fetchFn);
+    const results = await geocodeAddress("Nganjuk", fetchFn);
     expect(results).toHaveLength(1);
     expect(results[0]?.displayName).toBe("OK");
   });
@@ -179,16 +179,16 @@ describe("reverseGeocode", () => {
   it("returns the display name for a point", async () => {
     const fetchFn: FetchFn = vi.fn(() =>
       Promise.resolve(
-        jsonResponse({ display_name: "Jl. Pahlawan, Kota Madiun" }),
+        jsonResponse({ display_name: "Jl. Pahlawan, Nganjuk" }),
       ),
     );
     await expect(reverseGeocode(ALUN_ALUN, fetchFn)).resolves.toBe(
-      "Jl. Pahlawan, Kota Madiun",
+      "Jl. Pahlawan, Nganjuk",
     );
     const calledUrl = (fetchFn as ReturnType<typeof vi.fn>).mock
       .calls[0][0] as string;
     expect(calledUrl).toContain("nominatim.openstreetmap.org/reverse");
-    expect(calledUrl).toContain("lat=-7.6298");
+    expect(calledUrl).toContain("lat=-7.6024");
   });
 
   it("returns null on failure instead of throwing", async () => {
@@ -223,14 +223,14 @@ describe("createGeocoder (debounce + throttle)", () => {
     });
     const p1 = geocoder.geocode("Alun");
     const p2 = geocoder.geocode("Alun-Alun");
-    const p3 = geocoder.geocode("Alun-Alun Madiun");
+    const p3 = geocoder.geocode("Alun-Alun Nganjuk");
 
     const results = await Promise.all([p1, p2, p3]);
     expect(fetchFn).toHaveBeenCalledTimes(1);
     const calledUrl = (fetchFn as ReturnType<typeof vi.fn>).mock
       .calls[0][0] as string;
     expect(decodeURIComponent(calledUrl).replace(/\+/g, " ")).toContain(
-      "Alun-Alun Madiun",
+      "Alun-Alun Nganjuk",
     );
     const expected: GeocodeResult[] = [
       { displayName: "Hasil", lat: -7.6, lng: 111.5 },

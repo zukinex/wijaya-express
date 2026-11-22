@@ -284,7 +284,7 @@ export default function DriverPage() {
       <header>
         <h1 className="text-2xl font-bold">Aplikasi Driver</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Wijaya Express — ojek lokal Kota Madiun.
+          Wijaya Express — ojek lokal Nganjuk & Jombang.
         </p>
       </header>
 

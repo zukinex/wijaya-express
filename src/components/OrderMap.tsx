@@ -19,7 +19,7 @@ import {
   TileLayer,
   useMapEvents,
 } from "react-leaflet";
-import { MADIUN_CENTER, type LatLng } from "@/lib/geo";
+import { NGANJUK_CENTER, type LatLng } from "@/lib/geo";
 
 export type MapPointKind = "pickup" | "dropoff";
 
@@ -74,7 +74,7 @@ export default function OrderMap({
 
   return (
     <MapContainer
-      center={[MADIUN_CENTER.lat, MADIUN_CENTER.lng]}
+      center={[NGANJUK_CENTER.lat, NGANJUK_CENTER.lng]}
       zoom={14}
       scrollWheelZoom
       style={{ height: 320, width: "100%", borderRadius: 8, zIndex: 0 }}

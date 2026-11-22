@@ -16,9 +16,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { calculateFare, formatRupiah } from "@/lib/fare";
 import {
-  MADIUN_CENTER,
+  NGANJUK_CENTER,
   formatDistance,
-  isInsideMadiun,
+  isInsideServiceArea,
+  outsideServiceAreaMessage,
   type LatLng,
 } from "@/lib/geo";
 import {
@@ -55,8 +56,8 @@ interface RouteInfo {
 }
 
 const SERVICE_DESCRIPTIONS: Record<OrderService, string> = {
-  ride: "Naik ojek motor ke mana saja di Kota Madiun.",
-  parcel: "Kirim paket atau barang dalam kota.",
+  ride: "Naik ojek motor ke mana saja di Nganjuk dan Jombang.",
+  parcel: "Kirim paket atau barang dalam kabupaten.",
   food: "Driver belikan makanan di warung, lalu antar ke kamu.",
 };
 
@@ -86,6 +87,8 @@ export default function OrderFormPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [locating, setLocating] = useState(false);
+  /** Shown when a picked address / map tap / GPS fix is outside the service area. */
+  const [areaWarning, setAreaWarning] = useState<string | null>(null);
 
   const geocoderRef = useRef<Geocoder | null>(null);
   const geocoder = (): Geocoder => {
@@ -143,6 +146,18 @@ export default function OrderFormPage() {
     which: MapPointKind,
   ): void => {
     const point: LatLng = { lat: result.lat, lng: result.lng };
+    // Out-of-area result (e.g. "Stasiun Kertosono" in Nganjuk): do NOT
+    // set the point — the map stays on Nganjuk and the user gets a clear
+    // warning instead of a pin somewhere off-screen.
+    const shortName = result.displayName.split(",")[0]?.trim() || "Alamat ini";
+    const outside = outsideServiceAreaMessage(point, shortName);
+    if (outside) {
+      setAreaWarning(outside);
+      if (which === "pickup") setPickupSuggestions([]);
+      else setDropoffSuggestions([]);
+      return;
+    }
+    setAreaWarning(null);
     if (which === "pickup") {
       setPickupAddress(result.displayName);
       setPickupPoint(point);
@@ -155,6 +170,16 @@ export default function OrderFormPage() {
   };
 
   const handleMapPoint = (which: MapPointKind, point: LatLng): void => {
+    // Tapping / dragging outside the service area must not move the pin.
+    const outside = outsideServiceAreaMessage(
+      point,
+      which === "pickup" ? "Titik jemput" : "Titik tujuan",
+    );
+    if (outside) {
+      setAreaWarning(outside);
+      return;
+    }
+    setAreaWarning(null);
     if (which === "pickup") {
       setPickupPoint(point);
       if (!pickupAddress) {
@@ -184,6 +209,13 @@ export default function OrderFormPage() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
+        const outside = outsideServiceAreaMessage(point, "Lokasi saya");
+        if (outside) {
+          setAreaWarning(outside);
+          setLocating(false);
+          return;
+        }
+        setAreaWarning(null);
         setPickupPoint(point);
         const name = await reverseGeocode(point);
         setPickupAddress(
@@ -203,9 +235,9 @@ export default function OrderFormPage() {
   };
 
   const pickupOutside =
-    pickupPoint !== null && !isInsideMadiun(pickupPoint);
+    pickupPoint !== null && !isInsideServiceArea(pickupPoint);
   const dropoffOutside =
-    dropoffPoint !== null && !isInsideMadiun(dropoffPoint);
+    dropoffPoint !== null && !isInsideServiceArea(dropoffPoint);
   const fare =
     routeInfo && routeInfo.distanceKm > 0
       ? calculateFare(routeInfo.distanceKm)
@@ -342,7 +374,7 @@ export default function OrderFormPage() {
                 searchAddress(e.target.value, "pickup");
               }}
               onFocus={() => setActivePoint("pickup")}
-              placeholder="Contoh: Alun-Alun Madiun"
+              placeholder="Contoh: Alun-Alun Nganjuk"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
@@ -375,7 +407,7 @@ export default function OrderFormPage() {
           {pickupOutside && (
             <p className="mt-1 text-sm text-red-700">
               Titik jemput di luar area layanan — Wijaya Express hanya
-              melayani Kota Madiun.
+              melayani Kabupaten Nganjuk dan Jombang.
             </p>
           )}
 
@@ -389,7 +421,7 @@ export default function OrderFormPage() {
                 searchAddress(e.target.value, "dropoff");
               }}
               onFocus={() => setActivePoint("dropoff")}
-              placeholder="Contoh: Stasiun Madiun"
+              placeholder="Contoh: Stasiun Kertosono"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
@@ -414,7 +446,7 @@ export default function OrderFormPage() {
           {dropoffOutside && (
             <p className="mt-1 text-sm text-red-700">
               Titik tujuan di luar area layanan — Wijaya Express hanya
-              melayani Kota Madiun.
+              melayani Kabupaten Nganjuk dan Jombang.
             </p>
           )}
 
@@ -446,6 +478,22 @@ export default function OrderFormPage() {
           </div>
 
           <div className="mt-2">
+            {areaWarning && (
+              <div
+                role="alert"
+                className="mb-2 flex items-start justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+              >
+                <span>{areaWarning}</span>
+                <button
+                  type="button"
+                  onClick={() => setAreaWarning(null)}
+                  aria-label="Tutup peringatan"
+                  className="shrink-0 font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             <OrderMap
               pickup={pickupPoint}
               dropoff={dropoffPoint}
@@ -456,8 +504,8 @@ export default function OrderFormPage() {
             <p className="mt-1 text-xs text-slate-500">
               Peta: © OpenStreetMap contributors. Ketuk peta untuk
               menaruh titik {activePoint === "pickup" ? "jemput" : "tujuan"}
-              . Pusat peta: Alun-Alun Madiun ({MADIUN_CENTER.lat},{" "}
-              {MADIUN_CENTER.lng}).
+              . Pusat peta: Alun-Alun Nganjuk ({NGANJUK_CENTER.lat},{" "}
+              {NGANJUK_CENTER.lng}).
             </p>
           </div>
         </section>

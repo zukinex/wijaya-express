@@ -1,6 +1,6 @@
 # Requirements — Wijaya Express
 
-Wijaya Express is a local ride-hailing app for Madiun city only — a small,
+Wijaya Express is a local ride-hailing app for Kabupaten Nganjuk dan Jombang only — a small,
 Gojek-style service run by one operator (the admin) with 5 drivers at launch.
 Three services: ride (antar orang), parcel (antar barang/paket), and food
 (antar makanan). Payment is cash only (tunai). There is no wallet, no
@@ -18,7 +18,7 @@ Acceptance criteria use EARS notation: `WHEN <trigger> THE SYSTEM SHALL
 
 ## Requirement 1 — Place an order (passenger, guest)
 
-**User story:** As a passenger in Madiun, I want to order a ride, a parcel
+**User story:** As a passenger di Nganjuk dan Jombang, I want to order a ride, a parcel
 delivery, or food without creating an account, so I can get help fast.
 
 - WHEN the passenger opens the app, THE SYSTEM SHALL show the three
@@ -34,8 +34,8 @@ delivery, or food without creating an account, so I can get help fast.
 - WHEN an address cannot be geocoded or the route cannot be computed, THE
   SYSTEM SHALL show a plain-language error and let the passenger correct
   the address (never silently use a wrong location).
-- WHEN the pickup or destination is outside the Madiun service area, THE
-  SYSTEM SHALL refuse the order and explain the service covers Madiun city
+- WHEN the pickup or destination is outside the Nganjuk–Jombang service area, THE
+  SYSTEM SHALL refuse the order and explain the service covers Kabupaten Nganjuk dan Jombang
   only.
 
 ## Requirement 2 — Food order details

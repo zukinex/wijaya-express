@@ -6,7 +6,7 @@ inclusion: always
 
 ## What it is
 
-Wijaya Express is a local ride-hailing app for Madiun city only. One
+Wijaya Express is a local ride-hailing app for Kabupaten Nganjuk dan Jombang only. One
 operator (admin) runs it with 5 drivers at launch. Three services: ride
 (antar orang), parcel (antar barang/paket), food (antar makanan). Payment
 is cash only. Passengers order as guests (no account). Drivers and the
@@ -15,7 +15,7 @@ from the browser, no Play Store listing.
 
 ## Who it is for
 
-- **Passengers in Madiun**: anyone who needs a motorbike ride, a parcel
+- **Passengers di Nganjuk dan Jombang**: anyone who needs a motorbike ride, a parcel
   delivered, or food brought from a warung — ordered in under a minute,
   paid in cash.
 - **Drivers**: 5 local drivers at launch, working when they toggle online.
@@ -31,7 +31,7 @@ fronts the food money at the warung.
 
 ## Product principles
 
-1. **Local only, on purpose.** Madiun city. One tariff, one operator,
+1. **Local only, on purpose.** Kabupaten Nganjuk dan Jombang. One tariff, one operator,
    five drivers. No multi-city complexity in v1.
 2. **Cash is the payment system.** No bank account, e-wallet, or card is
    needed by anyone. The app never touches money.

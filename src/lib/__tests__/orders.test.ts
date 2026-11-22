@@ -12,17 +12,17 @@ import {
 } from "../orders";
 import type { LatLng } from "../geo";
 
-const ALUN_ALUN: LatLng = { lat: -7.6298, lng: 111.5235 };
-const STASIUN: LatLng = { lat: -7.6219, lng: 111.5153 };
+const ALUN_ALUN: LatLng = { lat: -7.6024, lng: 111.901 };
+const STASIUN: LatLng = { lat: -7.592, lng: 112.101 };
 
 function validInput(overrides: Partial<OrderInput> = {}): OrderInput {
   return {
     service: "ride",
     passengerName: "Budi",
     passengerPhone: "0812 3456 7890",
-    pickup: { address: "Alun-Alun Madiun", point: ALUN_ALUN },
-    dropoff: { address: "Stasiun Madiun", point: STASIUN },
-    distanceKm: 1.3,
+    pickup: { address: "Alun-Alun Nganjuk", point: ALUN_ALUN },
+    dropoff: { address: "Stasiun Kertosono", point: STASIUN },
+    distanceKm: 22.1,
     ...overrides,
   };
 }
@@ -59,7 +59,7 @@ describe("validateOrderInput", () => {
     ).toBeDefined();
   });
 
-  it("rejects points outside Madiun", () => {
+  it("rejects points outside Nganjuk", () => {
     const surabaya: LatLng = { lat: -7.2575, lng: 112.7521 };
     expect(
       validateOrderInput(
@@ -89,7 +89,7 @@ describe("validateOrderInput", () => {
     expect(
       validateOrderInput(
         validInput({
-          dropoff: { address: "Alun-Alun Madiun", point: ALUN_ALUN },
+          dropoff: { address: "Alun-Alun Nganjuk", point: ALUN_ALUN },
           distanceKm: 0,
         }),
       ).distance,

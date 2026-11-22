@@ -9,11 +9,11 @@
  * - Geocoding: Nominatim (OpenStreetMap). Usage policy: at most
  *   1 request/second, proper identification. `createGeocoder()` enforces
  *   both a trailing debounce (for typing) and the 1 req/s throttle.
- *   Results are biased to the Madiun bounding box.
+ *   Results are biased to the service-area bounding box.
  *
  * No paid maps API is ever called (no Google Maps key).
  */
-import { haversineKm, MADIUN_BOUNDS, type LatLng } from "./geo";
+import { haversineKm, SERVICE_AREA_BOUNDS, type LatLng } from "./geo";
 
 export type FetchFn = typeof fetch;
 
@@ -21,7 +21,7 @@ const OSRM_BASE = "https://router.project-osrm.org/route/v1/driving";
 const NOMINATIM_BASE = "https://nominatim.openstreetmap.org/search";
 
 /** Identifies Wijaya Express to the free services (Nominatim policy). */
-const USER_AGENT = "WijayaExpress/0.1 (ojek lokal Madiun)";
+const USER_AGENT = "WijayaExpress/0.1 (ojek lokal Nganjuk & Jombang)";
 
 export interface RouteResult {
   /** Distance in kilometres (road distance, or Haversine × 1.3 fallback). */
@@ -105,7 +105,7 @@ interface NominatimItem {
 }
 
 /**
- * Geocode one address via Nominatim, biased to the Madiun area.
+ * Geocode one address via Nominatim, biased to the service area.
  * Returns [] when nothing matches. Throws on an empty query or a
  * failed request (caller shows a plain-language error).
  */
@@ -121,7 +121,7 @@ export async function geocodeAddress(
     format: "json",
     limit: "5",
     countrycodes: "id",
-    viewbox: `${MADIUN_BOUNDS.minLng},${MADIUN_BOUNDS.minLat},${MADIUN_BOUNDS.maxLng},${MADIUN_BOUNDS.maxLat}`,
+    viewbox: `${SERVICE_AREA_BOUNDS.minLng},${SERVICE_AREA_BOUNDS.minLat},${SERVICE_AREA_BOUNDS.maxLng},${SERVICE_AREA_BOUNDS.maxLat}`,
     bounded: "1",
     q: trimmed,
   });

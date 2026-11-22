@@ -1,11 +1,19 @@
 /**
- * Geography helpers for Wijaya Express (Madiun only).
+ * Geography helpers for Wijaya Express (Kabupaten Nganjuk + Jombang).
  *
  * - Haversine distance between two points (straight line).
- * - Madiun service-area bounding box: pickup and destination must both
- *   be inside it (Req 1, Req 9). The box is an initial estimate covering
- *   Kota Madiun and the nearby area — the operator should confirm the
- *   exact box against OpenStreetMap before launch (see tasks.md task 20).
+ * - Service-area bounding box: pickup and destination must both be
+ *   inside it (Req 1, Req 9). The box is the union of the OpenStreetMap
+ *   boundaries of Kabupaten Nganjuk (relation 9676372) and Kabupaten
+ *   Jombang (relation 13851137), via Nominatim, checked 2026-11-22 —
+ *   the operator should confirm the exact box against OpenStreetMap
+ *   before launch (see tasks.md task 20).
+ *
+ * Note: a bounding box is a rectangle, so a few places just outside
+ * the two regencies still fall inside it — notably Kota Kediri in the
+ * far south (about 27 km from Alun-Alun Nganjuk) and Kota Mojokerto
+ * in the far east (about 61 km). The operator accepted this ("gpp")
+ * on 2026-11-22; a polygon check would be needed to exclude those.
  */
 
 export interface LatLng {
@@ -16,20 +24,22 @@ export interface LatLng {
 const EARTH_RADIUS_KM = 6371;
 
 /**
- * Initial Madiun service area (bounding box).
- * lat [-7.70, -7.55], lng [111.45, 111.60] — covers Kota Madiun and the
- * immediate surroundings. OPERATOR: confirm these coordinates before
- * launch; adjust here and the box check below follows automatically.
+ * Service area (bounding box = union of the Kabupaten Nganjuk and
+ * Kabupaten Jombang boxes from OpenStreetMap).
+ * lat [-7.8366, -7.3437], lng [111.7254, 112.4558] — covers both
+ * regencies, including Kertosono in the east and Jombang city.
+ * OPERATOR: confirm these coordinates before launch; adjust here and
+ * the box check below follows automatically.
  */
-export const MADIUN_BOUNDS = {
-  minLat: -7.7,
-  maxLat: -7.55,
-  minLng: 111.45,
-  maxLng: 111.6,
+export const SERVICE_AREA_BOUNDS = {
+  minLat: -7.8366,
+  maxLat: -7.3437,
+  minLng: 111.7254,
+  maxLng: 112.4558,
 } as const;
 
-/** Centre of Kota Madiun (Alun-Alun area) — default map centre. */
-export const MADIUN_CENTER: LatLng = { lat: -7.6298, lng: 111.5235 };
+/** Centre of the service area (Alun-Alun Nganjuk) — default map centre. */
+export const NGANJUK_CENTER: LatLng = { lat: -7.6024, lng: 111.901 };
 
 function assertValidPoint(point: LatLng, name: string): void {
   if (
@@ -78,16 +88,41 @@ export function haversineMeters(a: LatLng, b: LatLng): number {
 }
 
 /**
- * True when the point is inside the Madiun service-area bounding box
+ * True when the point is inside the service-area bounding box
  * (edges inclusive). Throws on invalid coordinates.
  */
-export function isInsideMadiun(point: LatLng): boolean {
+export function isInsideServiceArea(point: LatLng): boolean {
   assertValidPoint(point, "point");
   return (
-    point.lat >= MADIUN_BOUNDS.minLat &&
-    point.lat <= MADIUN_BOUNDS.maxLat &&
-    point.lng >= MADIUN_BOUNDS.minLng &&
-    point.lng <= MADIUN_BOUNDS.maxLng
+    point.lat >= SERVICE_AREA_BOUNDS.minLat &&
+    point.lat <= SERVICE_AREA_BOUNDS.maxLat &&
+    point.lng >= SERVICE_AREA_BOUNDS.minLng &&
+    point.lng <= SERVICE_AREA_BOUNDS.maxLng
+  );
+}
+
+/**
+ * Plain-language warning for a point outside the service area,
+ * or null when the point is inside.
+ *
+ * Used when a geocode result, a map tap, or the GPS location lands
+ * outside the box (e.g. "Stasiun Madiun", about 41 km west): the caller
+ * shows this message and does NOT move the map or set the point, so the
+ * map stays on Nganjuk instead of jumping out to the whole of East
+ * Java. `label` is the short name shown to the user (address or "Titik
+ * jemput"/"Titik tujuan"); the distance is measured from Alun-Alun
+ * Nganjuk. Throws on invalid coordinates.
+ */
+export function outsideServiceAreaMessage(
+  point: LatLng,
+  label: string,
+): string | null {
+  if (isInsideServiceArea(point)) return null;
+  const distance = formatDistance(haversineKm(point, NGANJUK_CENTER));
+  return (
+    `${label} di luar area layanan — titiknya sekitar ${distance} dari ` +
+    `Alun-Alun Nganjuk. Wijaya Express hanya melayani Kabupaten Nganjuk dan Jombang, ` +
+    `jadi titiknya tidak dipasang dan peta tetap di Nganjuk.`
   );
 }
 

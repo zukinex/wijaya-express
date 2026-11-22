@@ -119,16 +119,45 @@ Requirements are referenced as `Req N` (see `requirements.md`).
        use the new tariff; existing orders keep their stored fare.
        _Req 3, Req 8_
 
+## Perbaikan dari pengujian (operator)
+
+- [x] 17. Peringatan jelas untuk alamat di luar area layanan: hasil
+       geocode, ketukan peta, atau GPS di luar kotak Madiun DITOLAK —
+       titik tidak dipasang, peta tetap di Madiun, dan muncul banner
+       peringatan (role="alert", bisa ditutup) berisi nama alamat +
+       jarak dari Alun-Alun, mis. "Stasiun Kertosono di luar area
+       layanan — titiknya sekitar 65,0 km dari Alun-Alun Madiun."
+       _Req 1, Req 9_
+       **DONE 2026-11-21:** `outsideServiceAreaMessage()` di
+       `src/lib/geo.ts` + guard di `pickSuggestion` / `handleMapPoint` /
+       `useMyLocation` di `src/app/pesan/page.tsx` (4 tes baru).
+       Verified: 91/91 tests pass, type-check 0 errors, build exit 0.
+       NOT YET DEPLOYED — push ke GitHub + redeploy Vercel masih
+       menunggu konfirmasi operator (push = deploy otomatis).
+
 ## Phase 5 — PWA + testing + launch
 
-- [ ] 17. Add the PWA manifest + icons + hand-written service worker
+- [x] 17. Add the PWA manifest + icons + hand-written service worker
        (app shell cached, clear offline message); verify "Add to Home
        screen" on Android Chrome and iOS Safari.
        _Req 10_
+       **DONE 2026-11-21:** `public/manifest.webmanifest` (standalone,
+       theme #16a34a, 192/512 + maskable icons) + `public/icons/` (PIL,
+       green "W") + hand-written `public/sw.js` (app shell cached,
+       navigations network-first with "Kamu sedang offline" fallback,
+       never caches API/cross-origin) + `ServiceWorkerRegister` in
+       layout + metadata (manifest, theme-color, apple-touch-icon).
+       Verified: 94/94 tests pass (3 new PWA tests), type-check 0
+       errors, build exit 0, live smoke on :3100 — manifest/sw/icon
+       all 200, HTML carries manifest + theme-color + apple-touch-icon.
+       NOT YET DEPLOYED — local commit only, push still needs operator
+       OK (push also ships the held out-of-area fix, commit a7e2f3b).
+       Manual "Add to Home screen" check on real Android + iPhone
+       still pending (operator-side).
 - [ ] 18. Full manual end-to-end on real phones (1 passenger + 1 driver
        minimum, 5 drivers for the race test): ride, parcel, and food
        orders through created → accepted → picked up → delivered →
-       completed (cash); plus negative paths (outside Madiun, bad
+       completed (cash); plus negative paths (outside Nganjuk, bad
        address, OSRM down → estimate fare, backend unconfigured, second
        accept race, offline driver receives nothing).
        _Req 1–11_
@@ -137,7 +166,42 @@ Requirements are referenced as `Req N` (see `requirements.md`).
        verify the full flow on the public URL from a phone.
        _Req 10_
 - [ ] 20. Launch checklist with the operator: 5 driver accounts + plates
-       registered, tariff confirmed (6000/2/3500), Madiun bounding box
+       registered, tariff confirmed (6000/2/3500), Nganjuk + Jombang bounding box
        confirmed, cash float for food fronting agreed with drivers,
        admin phone as the support contact on the home page.
        _Req 4, Req 8_
+- [x] 21. Pindah area layanan dari Kota Madiun ke Kabupaten Nganjuk
+       (keputusan operator 2026-11-22): bounding box dari batas
+       OpenStreetMap Kabupaten Nganjuk (lat [-7.8366, -7.3937], lng
+       [111.7254, 112.1697]), pusat peta + referensi jarak pindah ke
+       Alun-Alun Nganjuk (-7.6024, 111.9010), semua teks "Madiun" di
+       UI/spek jadi "Nganjuk". Stasiun Kertosono kini DI DALAM area
+       (22,1 km dari Alun-Alun); Stasiun Madiun kini di luar area
+       (41,5 km). Tarif tetap 6000/2/3500.
+       _Req 1, Req 9_
+       **DONE 2026-11-22:** `NGANJUK_BOUNDS` / `NGANJUK_CENTER` /
+       `isInsideNganjuk()` di `src/lib/geo.ts` + geocode viewbox,
+       validasi order, peta, dan semua copy UI.
+       Verified: 94/94 tests pass, type-check 0 errors, build exit 0.
+       NOT YET DEPLOYED — local commit only, push masih menunggu
+       konfirmasi operator (push juga mengirim fix luar-area a7e2f3b
+       + PWA a0b168f).
+- [x] 22. Tambah Kabupaten Jombang ke area layanan (keputusan operator
+       2026-11-22, "gpp... sama Jombang ikutin juga"): bounding box
+       jadi gabungan dua kabupaten dari OpenStreetMap (lat [-7.8366,
+       -7.3437], lng [111.7254, 112.4558]); pusat peta + referensi jarak
+       tetap Alun-Alun Nganjuk; semua teks jadi "Nganjuk dan Jombang".
+       Kota Jombang kini DI DALAM area (36,5 km dari Alun-Alun).
+       Catatan: kotak persegi juga mencakup Kota Kediri (selatan,
+       ~27 km) dan Kota Mojokerto (timur, ~61 km) — operator menerima
+       ("gpp"). Tarif tetap 6000/2/3500.
+       _Req 1, Req 9_
+       **DONE 2026-11-22:** `SERVICE_AREA_BOUNDS` /
+       `isInsideServiceArea()` di `src/lib/geo.ts` (nama digeneralisasi
+       supaya gampang tambah area lagi) + geocode viewbox, validasi
+       order, dan semua copy UI.
+       Verified: 94/94 tests pass (2 tes baru Jombang), type-check 0
+       errors, build exit 0.
+       NOT YET DEPLOYED — local commit only, push masih menunggu
+       konfirmasi operator (push juga mengirim a7e2f3b + PWA a0b168f
+       + pindah area 3e2ba57).

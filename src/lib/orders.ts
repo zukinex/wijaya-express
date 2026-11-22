@@ -3,7 +3,7 @@
  *
  * Guest passengers (no login) create orders. The order flow:
  *   1. Validate the input (name, Indonesian phone, both points inside
- *      the Madiun box, food details when service is food).
+ *      the service-area box, food details when service is food).
  *   2. Read the current `tariffs` row from Supabase — the single source
  *      of truth for the fare. If the row cannot be read, fall back to
  *      the launch defaults mirrored in `fare.ts`.
@@ -19,7 +19,7 @@ import {
   BASE_FARE_IDR,
   PER_KM_IDR,
 } from "./fare";
-import { isInsideMadiun, type LatLng } from "./geo";
+import { isInsideServiceArea, type LatLng } from "./geo";
 
 export type OrderService = "ride" | "parcel" | "food";
 export type OrderStatus =
@@ -157,8 +157,8 @@ export function validateOrderInput(input: OrderInput): OrderValidationErrors {
     errors.pickup = "Isi alamat jemput.";
   } else {
     try {
-      if (!isInsideMadiun(input.pickup.point)) {
-        errors.pickup = "Titik jemput di luar area layanan (Kota Madiun).";
+      if (!isInsideServiceArea(input.pickup.point)) {
+        errors.pickup = "Titik jemput di luar area layanan (Kabupaten Nganjuk dan Jombang).";
       }
     } catch {
       errors.pickup = "Titik jemput tidak valid — pilih di peta.";
@@ -168,8 +168,8 @@ export function validateOrderInput(input: OrderInput): OrderValidationErrors {
     errors.dropoff = "Isi alamat tujuan.";
   } else {
     try {
-      if (!isInsideMadiun(input.dropoff.point)) {
-        errors.dropoff = "Titik tujuan di luar area layanan (Kota Madiun).";
+      if (!isInsideServiceArea(input.dropoff.point)) {
+        errors.dropoff = "Titik tujuan di luar area layanan (Kabupaten Nganjuk dan Jombang).";
       }
     } catch {
       errors.dropoff = "Titik tujuan tidak valid — pilih di peta.";

@@ -24,7 +24,7 @@ wijaya-express/
 │   └── lib/
 │       ├── fare.ts             # tariff formula + rupiah formatting (Phase 1)
 │       ├── supabase.ts         # Supabase client, graceful unconfigured state (Phase 1)
-│       ├── geo.ts              # Phase 2: Haversine, Madiun bounding box
+│       ├── geo.ts              # Phase 2: Haversine, Nganjuk + Jombang bounding box
 │       └── routing.ts          # Phase 2: OSRM + Nominatim + fallbacks
 ├── .env.example                # Supabase env var names (no real values)
 ├── next.config.mjs
@@ -40,7 +40,7 @@ wijaya-express/
   never floats for fares or prices.
 - `src/lib/` modules are pure and unit-tested with Vitest; UI components
   stay thin and call into `lib`.
-- Indonesian UI copy (the users are in Madiun). Code, comments, and specs
+- Indonesian UI copy (the users are di Nganjuk dan Jombang). Code, comments, and specs
   in English; user-facing text in Indonesian.
 - Env vars: only `NEXT_PUBLIC_SUPABASE_URL` and
   `NEXT_PUBLIC_SUPABASE_ANON_KEY` in the browser. Never the service-role

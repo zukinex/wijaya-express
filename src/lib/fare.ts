@@ -1,5 +1,5 @@
 /**
- * Tariff for Wijaya Express (Madiun, cash only).
+ * Tariff for Wijaya Express (Nganjuk & Jombang, cash only).
  *
  * One formula for all three services (ride, parcel, food). For food the
  * fare is the delivery fee only — the food price is paid separately in

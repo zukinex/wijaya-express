@@ -2,7 +2,7 @@
 
 ## Overview
 
-Wijaya Express is a local ride-hailing app for Madiun city only. One
+Wijaya Express is a local ride-hailing app for Kabupaten Nganjuk dan Jombang only. One
 operator (admin), 5 drivers at launch, 3 services (ride, parcel, food),
 cash payment. The app is a Next.js PWA on Vercel, backed by Supabase
 (Postgres + Realtime + Auth). No Google Maps, no paid APIs, no Play Store
@@ -169,7 +169,7 @@ created → accepted → picked_up → delivered → completed
   service with no SLA — the app must treat it as best-effort: on any
   failure/timeout, fall back to Haversine straight-line distance × 1.3
   (typical road factor in a small city) and label the fare "estimasi".
-- **Service area:** Madiun city bounding box, checked client-side before
+- **Service area:** Nganjuk + Jombang bounding box, checked client-side before
   the order is created (pickup and destination must both be inside).
   Exact box coordinates are set in Phase 2 after confirming them against
   OpenStreetMap.
@@ -209,7 +209,7 @@ crashing. Order creation is disabled in that state.
   known city pairs), order-status transition guards.
 - Manual end-to-end on phones (2 phones minimum: 1 passenger + 1 driver):
   create order → driver sees it → accept → picked up → delivered →
-  cash confirmed; plus negative paths (outside Madiun, bad address,
+  cash confirmed; plus negative paths (outside the service area, bad address,
   second driver accept race, offline driver gets nothing, backend
   unconfigured banner).
 - `npm run type-check` and `npm run lint` must be green before every

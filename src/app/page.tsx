@@ -12,12 +12,12 @@ const SERVICES = [
   {
     name: "Antar Orang",
     description:
-      "Naik ojek motor ke mana saja di Kota Madiun. Pesan, driver datang, bayar tunai.",
+      "Naik ojek motor ke mana saja di Nganjuk dan Jombang. Pesan, driver datang, bayar tunai.",
   },
   {
     name: "Antar Barang",
     description:
-      "Kirim paket atau barang dalam kota. Driver ambil di lokasi, antar sampai tujuan.",
+      "Kirim paket atau barang dalam kabupaten. Driver ambil di lokasi, antar sampai tujuan.",
   },
   {
     name: "Antar Makanan",
@@ -36,7 +36,7 @@ export default function HomePage() {
       <header className="text-center">
         <h1 className="text-3xl font-bold">Wijaya Express</h1>
         <p className="mt-2 text-slate-600">
-          Ojek lokal Kota Madiun — antar orang, barang, dan makanan. Bayar
+          Ojek lokal Nganjuk & Jombang — antar orang, barang, dan makanan. Bayar
           tunai.
         </p>
       </header>

@@ -143,10 +143,10 @@ function orderRow(overrides: Partial<OrderRow> = {}): OrderRow {
     status: "created",
     passenger_name: "Budi",
     passenger_phone: "+6281234567890",
-    pickup_address: "Alun-Alun Madiun",
+    pickup_address: "Alun-Alun Nganjuk",
     pickup_lat: -7.6298,
     pickup_lng: 111.5235,
-    dropoff_address: "Stasiun Madiun",
+    dropoff_address: "Stasiun Kertosono",
     dropoff_lat: -7.6219,
     dropoff_lng: 111.5153,
     distance_km: 1.3,
@@ -483,6 +483,6 @@ describe("navigateUrls", () => {
     );
     expect(urls.dropoffGoogleMaps).toContain("destination=-7.6219,111.5153");
     expect(urls.pickupGeo).toMatch(/^geo:-7\.6298,111\.5235\?q=/);
-    expect(urls.pickupGeo).toContain(encodeURIComponent("Alun-Alun Madiun"));
+    expect(urls.pickupGeo).toContain(encodeURIComponent("Alun-Alun Nganjuk"));
   });
 });
