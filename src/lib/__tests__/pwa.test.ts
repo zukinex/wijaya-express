@@ -20,6 +20,9 @@ describe("PWA manifest", () => {
     expect(existsSync(manifestPath)).toBe(true);
     const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
     expect(manifest.name).toContain("Wijaya Express");
+    expect(manifest.name).toContain("Nganjuk");
+    expect(manifest.name).toContain("Jombang");
+    expect(manifest.description).toContain("Nganjuk dan Jombang");
     expect(manifest.short_name).toBe("Wijaya Express");
     expect(manifest.start_url).toBe("/");
     expect(manifest.scope).toBe("/");
