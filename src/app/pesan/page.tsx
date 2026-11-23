@@ -33,10 +33,13 @@ import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 import {
   ORDER_SERVICES,
   SERVICE_LABELS,
+  calculateFareWithTariff,
   createOrder,
+  getTariff,
   validateOrderInput,
   type OrderService,
   type OrderValidationErrors,
+  type TariffRow,
 } from "@/lib/orders";
 import type { MapPointKind } from "@/components/OrderMap";
 
@@ -77,6 +80,10 @@ export default function OrderFormPage() {
   const [activePoint, setActivePoint] = useState<MapPointKind>("pickup");
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
+  // Live tariff from the database (admin-editable in /admin). The fare
+  // preview uses it when loaded; otherwise the launch defaults in
+  // fare.ts (same fallback createOrder uses — see orders.ts).
+  const [tariff, setTariff] = useState<TariffRow | null>(null);
   const [pickupSuggestions, setPickupSuggestions] = useState<
     GeocodeResult[]
   >([]);
@@ -95,6 +102,26 @@ export default function OrderFormPage() {
     if (!geocoderRef.current) geocoderRef.current = createGeocoder();
     return geocoderRef.current;
   };
+
+  // Load the live tariff once (for the fare preview). A missing or
+  // unreadable row is fine — the preview falls back to the launch
+  // defaults, same as createOrder.
+  useEffect(() => {
+    if (!backendConfigured) return;
+    const client = getSupabaseClient();
+    if (!client) return;
+    let alive = true;
+    getTariff(client)
+      .then((row) => {
+        if (alive && row) setTariff(row);
+      })
+      .catch(() => {
+        /* abaikan — pratinjau pakai tarif default */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [backendConfigured]);
 
   // Recompute the route (OSRM, Haversine fallback) when both points change.
   useEffect(() => {
@@ -240,7 +267,9 @@ export default function OrderFormPage() {
     dropoffPoint !== null && !isInsideServiceArea(dropoffPoint);
   const fare =
     routeInfo && routeInfo.distanceKm > 0
-      ? calculateFare(routeInfo.distanceKm)
+      ? tariff
+        ? calculateFareWithTariff(routeInfo.distanceKm, tariff)
+        : calculateFare(routeInfo.distanceKm)
       : null;
 
   const handleSubmit = async (

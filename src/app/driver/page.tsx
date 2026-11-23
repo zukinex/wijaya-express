@@ -371,8 +371,12 @@ export default function DriverPage() {
         >
           <p className="font-semibold">Kamu masuk sebagai admin.</p>
           <p className="mt-1 text-slate-600">
-            Halaman admin (semua order, kelola driver, ubah tarif) menyusul
-            di Fase 4. Halaman ini hanya untuk driver.
+            Buka{" "}
+            <Link href="/admin" className="font-semibold underline">
+              halaman admin
+            </Link>{" "}
+            untuk semua order, kelola driver, dan ubah tarif. Halaman ini
+            hanya untuk driver.
           </p>
           <button
             type="button"

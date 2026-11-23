@@ -110,14 +110,27 @@ Requirements are referenced as `Req N` (see `requirements.md`).
 
 ## Phase 4 — Admin
 
-- [ ] 15. Build the admin view (`/admin`): all orders newest first with
+- [x] 15. Build the admin view (`/admin`): all orders newest first with
        filters by status/service, full order timeline, driver list with
        online status + active/inactive switch, tariff editor (base fare,
        included km, per-km rate) writing to the `tariffs` row.
        _Req 8_
-- [ ] 16. Verify the tariff change rule: orders created after a change
+       **DONE 2026-11-23 (subagent):** `src/lib/admin.ts` (listAllOrders,
+       getOrderTimeline, listAllDrivers, setDriverActive, validateTariffInput,
+       updateTariff) + `src/app/admin/page.tsx` (sign-in, admin-role gate,
+       Order/Driver/Tarif tabs, Realtime + 15 s polling). Home page now
+       shows the LIVE tariff from the DB (fallback launch defaults) with
+       a link to /admin; the order form previews the fare with the live
+       tariff too. 20 new tests in `src/lib/__tests__/admin.test.ts`.
+- [x] 16. Verify the tariff change rule: orders created after a change
        use the new tariff; existing orders keep their stored fare.
        _Req 3, Req 8_
+       **DONE 2026-11-23 (subagent):** proven in `admin.test.ts`
+       ("tariff change rule (task 16)"): order created under 6000/2/3500
+       stores fare Rp 16.500 for 5 km; after updateTariff to 10000/3/2000
+       a new 5 km order stores Rp 14.000 while the first row still holds
+       Rp 16.500. The fare is computed from the tariffs row at insert
+       time and stored on the order — nothing re-fares a stored order.
 
 ## Perbaikan dari pengujian (operator)
 

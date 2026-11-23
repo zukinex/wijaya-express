@@ -1,12 +1,11 @@
 import Link from "next/link";
+import { formatRupiah } from "@/lib/fare";
+import { getSupabaseClient, getSupabaseConfigStatus } from "@/lib/supabase";
 import {
-  BASE_DISTANCE_KM,
-  BASE_FARE_IDR,
-  PER_KM_IDR,
-  calculateFare,
-  formatRupiah,
-} from "@/lib/fare";
-import { getSupabaseConfigStatus } from "@/lib/supabase";
+  calculateFareWithTariff,
+  defaultTariff,
+  getTariff,
+} from "@/lib/orders";
 
 const SERVICES = [
   {
@@ -26,10 +25,18 @@ const SERVICES = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
   const backend = getSupabaseConfigStatus();
+  // The tariff card shows the LIVE tariff from the database (the admin
+  // can change it in /admin). When the backend is unconfigured or the
+  // row cannot be read, fall back to the launch defaults.
+  let tariff = defaultTariff();
+  const client = getSupabaseClient();
+  if (client) {
+    tariff = (await getTariff(client).catch(() => null)) ?? defaultTariff();
+  }
   const exampleKm = 5;
-  const exampleFare = calculateFare(exampleKm);
+  const exampleFare = calculateFareWithTariff(exampleKm, tariff);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-8">
@@ -81,8 +88,9 @@ export default function HomePage() {
       <section className="mt-8 rounded-lg border bg-slate-50 px-4 py-3">
         <h2 className="text-xl font-semibold">Tarif</h2>
         <p className="mt-2 text-sm text-slate-700">
-          {formatRupiah(BASE_FARE_IDR)} untuk {BASE_DISTANCE_KM} km pertama,
-          +{formatRupiah(PER_KM_IDR)} per km berikutnya.
+          {formatRupiah(tariff.base_fare_idr)} untuk{" "}
+          {tariff.base_distance_km} km pertama, +
+          {formatRupiah(tariff.per_km_idr)} per km berikutnya.
         </p>
         <p className="mt-1 text-sm text-slate-700">
           Contoh: {exampleKm} km → {formatRupiah(exampleFare)}. Untuk Antar
@@ -103,6 +111,12 @@ export default function HomePage() {
           Driver Wijaya Express?{" "}
           <Link href="/driver" className="font-semibold underline">
             Masuk ke aplikasi driver
+          </Link>
+        </p>
+        <p className="mt-2 text-sm text-slate-600">
+          Operator?{" "}
+          <Link href="/admin" className="font-semibold underline">
+            Masuk ke halaman admin
           </Link>
         </p>
       </section>
